@@ -1,41 +1,56 @@
-const PARTICLES_QTY = 100;
-const MAX_TAIL_LENGTH = 500;
-const CELL_SIZE = 20;
+const PARTICLES_QTY = 2000;
+const MAX_TAIL_LENGTH = 100;
+const CELL_SIZE = 16;
+const ZOOM = 0.11;
+const CURVE = 7;
 
 class Particle {
   constructor(effect) {
     this.effect = effect;
-    this.x = Math.floor(Math.random() * effect.width);
-    this.y = Math.floor(Math.random() * effect.height);
-    this.vx = Math.random() * 2;
-    this.vy = Math.random() * 2;
+    this.vx;
+    this.vy;
+    this.speedModified = Math.random() * 3 + 1;
     this.angle = 0;
-    this.history = [{ x: this.x, y: this.y }];
+    this.reset();
   }
 
   update() {
-    let cellX = Math.floor(this.x / CELL_SIZE);
-    let cellY = Math.floor(this.y / CELL_SIZE);
-    let index = cellY + this.effect.columns + cellX;
-    this.angle = this.effect.flowField[index];
+    this.timer--;
 
-    this.vx = Math.cos(this.angle);
-    this.vy = Math.sin(this.angle);
+    if (this.timer >= 1) {
+      let cellX = Math.floor(this.x / CELL_SIZE);
+      let cellY = Math.floor(this.y / CELL_SIZE);
+      let index = cellY * this.effect.columns + cellX;
+      this.angle = this.effect.flowField[index];
 
-    this.x += this.vx;
-    this.y += this.vy;
+      this.vx = Math.cos(this.angle);
+      this.vy = Math.sin(this.angle);
 
-    this.history.push({ x: this.x, y: this.y });
-    if (this.history.length > MAX_TAIL_LENGTH) this.history.shift();
+      this.x += this.vx * this.speedModified;
+      this.y += this.vy * this.speedModified;
+
+      this.history.push({ x: this.x, y: this.y });
+      if (this.history.length > MAX_TAIL_LENGTH) this.history.shift();
+    } else if (this.history.length > 1) {
+      this.history.shift();
+    } else {
+      this.reset();
+    }
   }
 
   draw() {
     let context = this.effect.context;
-    context.fillRect(this.x, this.y, 10, 10);
     context.beginPath();
     context.moveTo(this.history[0].x, this.history[0].y);
     this.history.forEach((pos) => context.lineTo(pos.x, pos.y));
     context.stroke();
+  }
+
+  reset() {
+    this.x = Math.floor(Math.random() * effect.width);
+    this.y = Math.floor(Math.random() * effect.height);
+    this.timer = MAX_TAIL_LENGTH * 2;
+    this.history = [{ x: this.x, y: this.y }];
   }
 }
 
@@ -84,7 +99,7 @@ class Effect {
 
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.columns; x++) {
-        let angle = Math.cos(x) + Math.sin(y);
+        let angle = (Math.cos(x * ZOOM) + Math.sin(y * ZOOM)) * CURVE;
         this.flowField.push(angle);
       }
     }
