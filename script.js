@@ -1,5 +1,6 @@
 const PARTICLES_QTY = 100;
-const MAX_TAIL_LENGTH = 50;
+const MAX_TAIL_LENGTH = 500;
+const CELL_SIZE = 20;
 
 class Particle {
   constructor(effect) {
@@ -13,16 +14,23 @@ class Particle {
   }
 
   update() {
-    this.angle += 0;
-    this.x += this.vx + Math.sin(this.angle);
-    this.y += this.vy + Math.random() * 5 - 2.5;
+    let cellX = Math.floor(this.x / CELL_SIZE);
+    let cellY = Math.floor(this.y / CELL_SIZE);
+    let index = cellY + this.effect.columns + cellX;
+    this.angle = this.effect.flowField[index];
+
+    this.vx = Math.cos(this.angle);
+    this.vy = Math.sin(this.angle);
+
+    this.x += this.vx;
+    this.y += this.vy;
 
     this.history.push({ x: this.x, y: this.y });
     if (this.history.length > MAX_TAIL_LENGTH) this.history.shift();
   }
 
   draw() {
-    let context = this.effect.getContext();
+    let context = this.effect.context;
     context.fillRect(this.x, this.y, 10, 10);
     context.beginPath();
     context.moveTo(this.history[0].x, this.history[0].y);
@@ -34,10 +42,12 @@ class Particle {
 class Effect {
   constructor(canvas) {
     this.canvas = canvas;
-    this.configureCanvas();
-    this.width = canvas.width;
-    this.height = canvas.height;
     this.particles = [];
+    this.rows;
+    this.columns;
+    this.flowField = [];
+    this.configureCanvas();
+    this.configureFlowField();
   }
 
   configureCanvas() {
@@ -51,12 +61,33 @@ class Effect {
     ctx.lineWidth = 1;
   }
 
-  getContext() {
+  get width() {
+    return this.canvas.width;
+  }
+
+  get height() {
+    return this.canvas.height;
+  }
+
+  get context() {
     return this.canvas.getContext("2d");
   }
 
   clearCanvas() {
-    this.getContext().clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  configureFlowField() {
+    this.rows = Math.floor(this.height / CELL_SIZE);
+    this.columns = Math.floor(this.width / CELL_SIZE);
+    this.flowField = [];
+
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.columns; x++) {
+        let angle = Math.cos(x) + Math.sin(y);
+        this.flowField.push(angle);
+      }
+    }
   }
 
   createParticles() {
