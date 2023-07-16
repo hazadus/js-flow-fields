@@ -61,8 +61,15 @@ class Effect {
     this.rows;
     this.columns;
     this.flowField = [];
+    this.debugMode = true;
+    this._fps = 0;
+    this._prevTimestamp = 0;
     this.configureCanvas();
     this.configureFlowField();
+
+    window.addEventListener("keydown", (event) => {
+      if (event.code == "Space") this.debugMode = !this.debugMode;
+    });
   }
 
   configureCanvas() {
@@ -74,6 +81,7 @@ class Effect {
     ctx.fillStyle = "blue";
     ctx.strokeStyle = "white";
     ctx.lineWidth = 1;
+    ctx.font = "normal 12pt Courier";
   }
 
   get width() {
@@ -118,9 +126,17 @@ class Effect {
     });
   }
 
+  handleFPS(timestamp) {
+    // Calculate and print FPS
+    this._fps = Math.round(1000 / (timestamp - this._prevTimestamp));
+    this._prevTimestamp = timestamp;
+    this.context.fillText(this._fps + " fps", 8, 16);
+  }
+
   drawGrid() {
     this.context.save();
     this.context.strokeStyle = "gray";
+    this.context.lineWidth = 0.2;
 
     for (let col = 1; col < this.columns + 1; col++) {
       this.context.beginPath();
@@ -138,9 +154,10 @@ class Effect {
     this.context.restore();
   }
 
-  renderFrame() {
+  renderFrame(timestamp) {
     this.clearCanvas();
-    this.drawGrid();
+    if (this.debugMode) this.drawGrid();
+    if (this.debugMode) this.handleFPS(timestamp);
     this.handleParticles();
   }
 }
@@ -149,8 +166,8 @@ class Effect {
 const effect = new Effect(document.getElementById("canvas1"));
 effect.createParticles();
 
-function animate() {
-  effect.renderFrame();
+function animate(timestamp) {
+  effect.renderFrame(timestamp);
   window.requestAnimationFrame(animate);
 }
 
