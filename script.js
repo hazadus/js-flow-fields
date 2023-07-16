@@ -1,6 +1,6 @@
 const PARTICLES_QTY = 2000;
 const MAX_TAIL_LENGTH = 100;
-const CELL_SIZE = 16;
+const CELL_SIZE = 8;
 const ZOOM = 0.11;
 const CURVE = 7;
 
@@ -118,8 +118,29 @@ class Effect {
     });
   }
 
+  drawGrid() {
+    this.context.save();
+    this.context.strokeStyle = "gray";
+
+    for (let col = 1; col < this.columns + 1; col++) {
+      this.context.beginPath();
+      this.context.moveTo(CELL_SIZE * col, 0);
+      this.context.lineTo(CELL_SIZE * col, this.height);
+      this.context.stroke();
+    }
+    for (let row = 1; row < this.rows + 1; row++) {
+      this.context.beginPath();
+      this.context.moveTo(0, CELL_SIZE * row);
+      this.context.lineTo(this.width, CELL_SIZE * row);
+      this.context.stroke();
+    }
+
+    this.context.restore();
+  }
+
   renderFrame() {
     this.clearCanvas();
+    this.drawGrid();
     this.handleParticles();
   }
 }
