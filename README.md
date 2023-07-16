@@ -4,6 +4,8 @@ Various particle effects using vanilla JavaScript.
 
 Press `Space` to toggle debug mode (show grid and FPS).
 
+![Screenshot](./images/screenshot.png)
+
 ## References
 
 - [Learn Creative Coding: Flow Fields](https://www.youtube.com/watch?v=MJNy2mdCt20)
