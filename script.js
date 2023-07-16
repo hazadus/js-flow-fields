@@ -2,7 +2,7 @@ const PARTICLES_QTY = 2000;
 const MAX_TAIL_LENGTH = 100;
 const CELL_SIZE = 8;
 const ZOOM = 0.11;
-const CURVE = 7;
+const CURVE = 16;
 
 class Particle {
   constructor(effect) {
@@ -11,7 +11,16 @@ class Particle {
     this.vy;
     this.speedModified = Math.random() * 3 + 1;
     this.angle = 0;
+    this.colors = ["#4C026B", "#730D9E", "#9622C7", "#B44AE0", "#CD72F2"];
+    this.color = this.colors[Math.floor(Math.random() * this.colors.length)];
     this.reset();
+  }
+
+  reset() {
+    this.x = Math.floor(Math.random() * effect.width);
+    this.y = Math.floor(Math.random() * effect.height);
+    this.timer = MAX_TAIL_LENGTH * 2;
+    this.history = [{ x: this.x, y: this.y }];
   }
 
   update() {
@@ -43,14 +52,8 @@ class Particle {
     context.beginPath();
     context.moveTo(this.history[0].x, this.history[0].y);
     this.history.forEach((pos) => context.lineTo(pos.x, pos.y));
+    context.strokeStyle = this.color;
     context.stroke();
-  }
-
-  reset() {
-    this.x = Math.floor(Math.random() * effect.width);
-    this.y = Math.floor(Math.random() * effect.height);
-    this.timer = MAX_TAIL_LENGTH * 2;
-    this.history = [{ x: this.x, y: this.y }];
   }
 }
 
