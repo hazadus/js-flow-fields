@@ -73,6 +73,11 @@ class Effect {
     window.addEventListener("keydown", (event) => {
       if (event.code == "Space") this.debugMode = !this.debugMode;
     });
+
+    window.addEventListener("resize", (event) => {
+      this.configureCanvas();
+      this.configureFlowField();
+    });
   }
 
   configureCanvas() {
